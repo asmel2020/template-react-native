@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { type ErrorBoundaryProps, useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { Button, Card, Separator, Text } from "panelui-native";
 import { ErrorState } from "./ui/error-state";
 
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [showDetails, setShowDetails] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
 
@@ -29,13 +31,13 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
     >
       <ErrorState
         variant="error"
-        title="¡Ups! Algo salió mal"
-        description="Se ha producido un error inesperado en la aplicación. Puedes intentar recargar la pantalla o volver al inicio."
+        title={t("errors.unexpectedTitle")}
+        description={t("errors.unexpectedDesc")}
         onRetry={handleRetry}
-        retryLabel="Reintentar operación"
+        retryLabel={t("errors.retry")}
         isRetrying={isRetrying}
         onAction={handleGoHome}
-        actionLabel="Ir al Inicio"
+        actionLabel={t("errors.goHome")}
       >
         {/* Toggle para mostrar detalles técnicos */}
         <View className="w-full pt-1">
@@ -44,7 +46,7 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
             className="w-full"
             onPress={() => setShowDetails((prev) => !prev)}
           >
-            {showDetails ? "Ocultar detalles técnicos ▲" : "Ver detalles técnicos ▼"}
+            {showDetails ? t("errors.hideTechnicalDetails") : t("errors.showTechnicalDetails")}
           </Button>
 
           {showDetails && (

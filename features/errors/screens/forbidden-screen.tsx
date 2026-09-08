@@ -1,27 +1,29 @@
 import React from "react";
 import { Stack, useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/components/ui/error-state";
 
 export function ForbiddenScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <>
       <Stack.Screen
         options={{
-          title: "Acceso Denegado",
+          title: t("errors.forbiddenTitle"),
           headerShown: true,
-          headerBackTitle: "Atrás",
+          headerBackTitle: t("common.back"),
         }}
       />
       <ErrorState
         variant="403"
-        title="Acceso Denegado (403)"
-        description="No dispones de los privilegios o permisos necesarios para ver esta pantalla o realizar esta acción."
+        title={t("errors.forbiddenTitle")}
+        description={t("errors.forbiddenDesc")}
         onAction={() => router.replace("/(app)/(tabs)" as any)}
-        actionLabel="Volver al Inicio"
+        actionLabel={t("errors.goHome")}
         secondaryAction={() => router.back()}
-        secondaryActionLabel="Regresar a la pantalla anterior"
+        secondaryActionLabel={t("errors.goBack")}
       />
     </>
   );

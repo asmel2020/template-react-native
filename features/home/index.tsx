@@ -1,17 +1,11 @@
 import { Image, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { Text, useThemeMode } from "panelui-native";
 
-/**
- * The landing screen — the one you delete first.
- *
- * It says three things and stops: what this is, that it is running, and the
- * one command that adds the next thing. A starter that opens on a dashboard
- * of invented numbers looks impressive and teaches nothing, and every line of
- * it is a line to remove before any real work begins.
- */
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const { mode } = useThemeMode();
 
   return (
@@ -19,8 +13,6 @@ export default function HomeScreen() {
       className="flex-1 items-center justify-center gap-8 bg-background px-8"
       style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
     >
-      {/* Two files rather than one tinted image: the mark carries a glow, and
-          a glow does not survive being recoloured. */}
       <Image
         source={
           mode === "dark"
@@ -34,20 +26,16 @@ export default function HomeScreen() {
 
       <View className="items-center gap-2">
         <Text size="3xl" weight="bold">
-          PanelUI
+          {t("home.title")}
         </Text>
         <Text muted className="text-center">
-          Edit{" "}
-          <Text muted className="font-mono">
-            app/(tabs)/index.tsx
-          </Text>{" "}
-          and save to reload.
+          {t("home.editPrompt")}
         </Text>
       </View>
 
       <View className="items-center gap-1">
         <Text size="sm" muted>
-          Add a component
+          {t("home.addComponent")}
         </Text>
         <View className="rounded-xl border border-border bg-surface px-4 py-2.5">
           <Text size="sm" className="font-mono">

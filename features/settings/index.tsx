@@ -1,5 +1,6 @@
 import { Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   Card,
@@ -10,11 +11,16 @@ import {
   useThemeMode,
 } from "panelui-native";
 import { useAuthStore } from "@/stores/auth-store";
+import { changeLanguage } from "@/config/i18n";
+import { SUPPORTED_LANGUAGES, type AppLanguage } from "@/config/i18n/types";
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
+  const { t, i18n } = useTranslation();
   const { family, mode, setFamily, toggleMode } = useThemeMode();
   const { user, reset } = useAuthStore((s) => s.auth);
+
+  const currentLang = (i18n.language as AppLanguage) || "es";
 
   const handleLogout = () => {
     reset();
@@ -32,9 +38,9 @@ export default function SettingsScreen() {
     >
       <View className="gap-1">
         <Text size="3xl" weight="bold">
-          Settings
+          {t("settings.title")}
         </Text>
-        <Text muted>Each family sets its own palette and its own corners.</Text>
+        <Text muted>{t("settings.subtitle")}</Text>
       </View>
 
       <View className="gap-3">
@@ -44,7 +50,36 @@ export default function SettingsScreen() {
           muted
           className="uppercase tracking-wider"
         >
-          Theme
+          {t("settings.language")}
+        </Text>
+
+        <Card className="p-3 gap-2">
+          <View className="flex-row gap-2">
+            {SUPPORTED_LANGUAGES.map((lang) => {
+              const isSelected = currentLang.startsWith(lang.id);
+              return (
+                <Button
+                  key={lang.id}
+                  variant={isSelected ? "primary" : "outline"}
+                  className="flex-1"
+                  onPress={() => changeLanguage(lang.id)}
+                >
+                  {`${lang.flag} ${lang.nativeName}`}
+                </Button>
+              );
+            })}
+          </View>
+        </Card>
+      </View>
+
+      <View className="gap-3">
+        <Text
+          size="sm"
+          weight="medium"
+          muted
+          className="uppercase tracking-wider"
+        >
+          {t("settings.theme")}
         </Text>
 
         {/* Built from PANEL_THEMES rather than a hardcoded list, so a family
@@ -88,15 +123,15 @@ export default function SettingsScreen() {
               who taps this lands in Moon light rather than default light. */}
           <Item>
             <Item.Content>
-              <Item.Title>Dark mode</Item.Title>
-              <Item.Description>Currently {mode}</Item.Description>
+              <Item.Title>{t("settings.darkMode")}</Item.Title>
+              <Item.Description>{`${t("settings.currently")} ${mode}`}</Item.Description>
             </Item.Content>
             <Item.Actions>
               <Switch
                 value={mode === "dark"}
                 onValueChange={toggleMode}
-                accessibilityLabel="Dark mode"
-                accessibilityHint={`Currently ${mode}`}
+                accessibilityLabel={t("settings.darkMode")}
+                accessibilityHint={`${t("settings.currently")} ${mode}`}
               />
             </Item.Actions>
           </Item>
@@ -110,7 +145,7 @@ export default function SettingsScreen() {
           muted
           className="uppercase tracking-wider"
         >
-          Cuenta
+          {t("settings.session")}
         </Text>
 
         <Card>
@@ -126,7 +161,7 @@ export default function SettingsScreen() {
               variant="destructive"
               onPress={handleLogout}
             >
-              Cerrar Sesión
+              {t("settings.logout")}
             </Button>
           </Card.Content>
         </Card>

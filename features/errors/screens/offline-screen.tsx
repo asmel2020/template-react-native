@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Stack, useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/components/ui/error-state";
 
 export function OfflineScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [isChecking, setIsChecking] = useState(false);
 
   const handleCheckConnection = async () => {
@@ -17,20 +19,20 @@ export function OfflineScreen() {
     <>
       <Stack.Screen
         options={{
-          title: "Sin Conexión",
+          title: t("errors.offlineTitle"),
           headerShown: true,
-          headerBackTitle: "Atrás",
+          headerBackTitle: t("common.back"),
         }}
       />
       <ErrorState
         variant="offline"
-        title="Sin Conexión a Internet"
-        description="Parece que has perdido la conexión. Comprueba tu señal de Wi-Fi o datos móviles para continuar navegando."
+        title={t("errors.offlineTitle")}
+        description={t("errors.offlineDesc")}
         onRetry={handleCheckConnection}
-        retryLabel="Verificar conexión"
+        retryLabel={t("errors.checkConnection")}
         isRetrying={isChecking}
         secondaryAction={() => router.back()}
-        secondaryActionLabel="Regresar"
+        secondaryActionLabel={t("errors.goBack")}
       />
     </>
   );

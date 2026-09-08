@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Stack, useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/components/ui/error-state";
 
 export function ServerErrorScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [isRetrying, setIsRetrying] = useState(false);
 
   const handleRetry = async () => {
@@ -17,22 +19,22 @@ export function ServerErrorScreen() {
     <>
       <Stack.Screen
         options={{
-          title: "Error del Servidor",
+          title: t("errors.serverErrorTitle"),
           headerShown: true,
-          headerBackTitle: "Atrás",
+          headerBackTitle: t("common.back"),
         }}
       />
       <ErrorState
         variant="500"
-        title="Error del Servidor (500)"
-        description="Nuestros servidores están experimentando intermitencias o están en mantenimiento programado. Por favor, intenta de nuevo en unos minutos."
+        title={t("errors.serverErrorTitle")}
+        description={t("errors.serverErrorDesc")}
         onRetry={handleRetry}
-        retryLabel="Comprobar estado y reintentar"
+        retryLabel={t("errors.retry")}
         isRetrying={isRetrying}
         onAction={() => router.replace("/(app)/(tabs)" as any)}
-        actionLabel="Volver al Inicio"
+        actionLabel={t("errors.goHome")}
         secondaryAction={() => router.back()}
-        secondaryActionLabel="Regresar"
+        secondaryActionLabel={t("errors.goBack")}
       />
     </>
   );

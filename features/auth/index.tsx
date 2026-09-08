@@ -1,5 +1,6 @@
 import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 import { Button, Card, Input, Text, toast } from "panelui-native";
@@ -7,7 +8,7 @@ import { useAuthStore } from "@/stores/auth-store";
 
 // Esquema de validación con Zod
 const signInSchema = z.object({
-  email: z.email("Ingresa un correo electrónico válido"),
+  email: z.string().email("Ingresa un correo electrónico válido"),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
 });
 
@@ -23,6 +24,7 @@ function createMockJwt(user: { id: number; username: string; email: string }) {
 
 export default function SignInScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const setAccessToken = useAuthStore((s) => s.auth.setAccessToken);
 
   // Formulario gestionado con TanStack Form y validado con Zod
@@ -49,13 +51,12 @@ export default function SignInScreen() {
 
         toast.show({
           variant: "success",
-          label: "¡Bienvenido!",
-          description: "Sesión iniciada correctamente.",
+          label: t("auth.loginSuccess"),
         });
       } catch {
         toast.show({
           variant: "destructive",
-          label: "Error al iniciar sesión",
+          label: t("common.error"),
           description: "Credenciales incorrectas.",
         });
       }
@@ -79,10 +80,10 @@ export default function SignInScreen() {
       >
         <View className="items-center mb-8 gap-2">
           <Text size="3xl" weight="bold">
-            Iniciar Sesión
+            {t("auth.signInTitle")}
           </Text>
           <Text muted className="text-center">
-            Ingresa a tu cuenta para acceder a las rutas protegidas.
+            {t("auth.signInSubtitle")}
           </Text>
         </View>
 
@@ -97,7 +98,7 @@ export default function SignInScreen() {
                 return (
                   <View className="gap-1">
                     <Input
-                      label="Correo Electrónico"
+                      label={t("auth.emailLabel")}
                       placeholder="correo@ejemplo.com"
                       value={field.state.value}
                       onChangeText={field.handleChange}
@@ -127,7 +128,7 @@ export default function SignInScreen() {
                 return (
                   <View className="gap-1">
                     <Input
-                      label="Contraseña"
+                      label={t("auth.passwordLabel")}
                       placeholder="••••••••"
                       value={field.state.value}
                       onChangeText={field.handleChange}
@@ -160,7 +161,7 @@ export default function SignInScreen() {
                   disabled={!canSubmit}
                   onPress={form.handleSubmit}
                 >
-                  Entrar
+                  {isSubmitting ? t("auth.submitting") : t("auth.submitButton")}
                 </Button>
               )}
             </form.Subscribe>

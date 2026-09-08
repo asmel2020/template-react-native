@@ -51,7 +51,11 @@ d:/trabajo/template-react-native/
 │       └── icons.tsx             # Iconos del sistema con resolución de color por tema
 ├── config/                       # Configuración y variables de entorno
 │   ├── api.ts                    # Instancia base de Axios con interceptores
-│   └── env.ts                    # Validación y exportación de variables de entorno
+│   ├── env.ts                    # Validación y exportación de variables de entorno
+│   └── i18n/                     # Sistema multi-idioma (i18next, locales, persistencia MMKV)
+│       ├── index.ts              # Inicializador de i18n con detección de dispositivo y helpers
+│       ├── types.ts              # Tipado estricto para react-i18next y selector de idiomas
+│       └── locales/              # Diccionarios tipados (es.ts, en.ts)
 ├── features/                     # LÓGICA DE NEGOCIO Y VISTAS (Feature Pattern)
 │   ├── auth/                     # Autenticación (SignInScreen, formularios, validación)
 │   ├── home/                     # Pantalla principal Home
@@ -344,7 +348,45 @@ export function LoginForm() {
 
 ---
 
-## 10. Convenciones de Código y TypeScript
+## 10. Sistema de Internacionalización y Multi-idioma (i18n)
+
+El proyecto cuenta con una arquitectura de internacionalización moderna, tipada y persistente basada en **`i18next`**, **`react-i18next`**, **`expo-localization`** y **`react-native-mmkv`**:
+
+### Arquitectura de i18n (`config/i18n/`):
+- **Detección Automática**: Al iniciar, `getInitialLanguage()` comprueba si el usuario tiene un idioma guardado en `preferenceStorage` (MMKV). Si no, detecta el idioma del dispositivo mediante `getLocales()` de `expo-localization`.
+- **Persistencia en MMKV**: La elección del usuario se almacena instantáneamente en almacenamiento síncrono nativo en C++.
+- **Tipado Estricto**: `config/i18n/types.ts` extiende el módulo `react-i18next` con `CustomTypeOptions` usando el esquema de `es.ts`, permitiendo que `t('clave.subclave')` cuente con **autocompletado total** y validación en tiempo de compilación.
+
+### Patrón de Uso en Componentes y Vistas:
+```tsx
+import React from "react";
+import { View } from "react-native";
+import { useTranslation } from "react-i18next";
+import { Text, Button } from "panelui-native";
+import { changeLanguage } from "@/config/i18n";
+
+export function ExampleI18n() {
+  const { t, i18n } = useTranslation();
+
+  return (
+    <View className="gap-2">
+      {/* 1. Uso tipado de cadenas de texto */}
+      <Text size="lg" weight="bold">{t("settings.title")}</Text>
+      <Text muted>{t("settings.subtitle")}</Text>
+
+      {/* 2. Cambio de idioma en caliente */}
+      <View className="flex-row gap-2">
+        <Button onPress={() => changeLanguage("es")}>Español</Button>
+        <Button onPress={() => changeLanguage("en")}>English</Button>
+      </View>
+    </View>
+  );
+}
+```
+
+---
+
+## 11. Convenciones de Código y TypeScript
 
 - **Modo Estricto**: TypeScript está configurado con `"strict": true`.
 - **Cero Errores**: Todo cambio debe pasar `pnpm typecheck` (`tsc --noEmit`) con código de salida 0.
@@ -358,7 +400,7 @@ export function LoginForm() {
 
 ---
 
-## 11. Comandos Frecuentes
+## 12. Comandos Frecuentes
 
 ```bash
 # Iniciar servidor de desarrollo Metro

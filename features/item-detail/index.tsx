@@ -1,6 +1,6 @@
-import React from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ActivityIndicator, ScrollView, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Badge, Button, Card, Separator, Text } from "panelui-native";
 import {
   useItemQuery,
@@ -10,6 +10,7 @@ import {
 export default function ItemDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const { data: item, isLoading, isError, error } = useItemQuery(id ?? "");
   const updateMutation = useUpdateItemMutation();
@@ -34,13 +35,10 @@ export default function ItemDetailScreen() {
       <Card className="p-4 bg-primary/10 border-primary/20">
         <View className="gap-1">
           <Text weight="bold" className="text-primary">
-            🛡️ Pantalla de Stack Protegido
+            🛡️ {t("itemDetail.protectedNoticeTitle")}
           </Text>
           <Text size="sm" muted>
-            Esta vista está implementada en{" "}
-            <Text weight="medium">features/item-detail/index.tsx</Text> y conectada
-            a la ruta <Text weight="medium">app/(app)/item-detail/[id].tsx</Text>. Se
-            apila sobre las pestañas con navegación nativa.
+            {t("itemDetail.protectedNoticeDesc")}
           </Text>
         </View>
       </Card>
@@ -49,7 +47,7 @@ export default function ItemDetailScreen() {
       {isLoading && (
         <View className="items-center justify-center py-12 gap-3">
           <ActivityIndicator size="large" />
-          <Text muted>Cargando detalle del item #{id}...</Text>
+          <Text muted>{`${t("itemDetail.loadingItem")} #${id}`}</Text>
         </View>
       )}
 
@@ -58,13 +56,13 @@ export default function ItemDetailScreen() {
         <Card className="p-4 border-destructive/30 bg-destructive/10">
           <View className="gap-3 items-center">
             <Text weight="bold" className="text-destructive">
-              Error al cargar el item
+              {t("itemDetail.errorTitle")}
             </Text>
             <Text size="sm" muted>
-              {error instanceof Error ? error.message : "Item no encontrado"}
+              {error instanceof Error ? error.message : "Item not found"}
             </Text>
             <Button variant="outline" onPress={() => router.back()}>
-              Regresar
+              {t("common.back")}
             </Button>
           </View>
         </Card>
@@ -78,7 +76,9 @@ export default function ItemDetailScreen() {
               ID: #{item.id}
             </Text>
             <Badge variant={item.completed ? "success" : "secondary"}>
-              {item.completed ? "Completado" : "Pendiente"}
+              {item.completed
+                ? t("itemDetail.completed")
+                : t("itemDetail.pending")}
             </Badge>
           </View>
 
@@ -89,7 +89,7 @@ export default function ItemDetailScreen() {
             {item.description ? (
               <Text muted>{item.description}</Text>
             ) : (
-              <Text muted>Sin descripción adicional</Text>
+              <Text muted>{t("itemDetail.noDescription")}</Text>
             )}
           </View>
 
@@ -97,7 +97,7 @@ export default function ItemDetailScreen() {
 
           <View className="gap-1">
             <Text size="xs" muted>
-              Fecha de creación:
+              {t("itemDetail.createdDate")}:
             </Text>
             <Text size="sm">
               {item.createdAt
@@ -113,12 +113,12 @@ export default function ItemDetailScreen() {
               onPress={handleToggleStatus}
             >
               {item.completed
-                ? "Marcar como Pendiente"
-                : "Marcar como Completado"}
+                ? t("itemDetail.markPending")
+                : t("itemDetail.markCompleted")}
             </Button>
 
             <Button variant="ghost" onPress={() => router.back()}>
-              ← Volver a la Lista
+              {`← ${t("itemDetail.backToList")}`}
             </Button>
           </View>
         </Card>

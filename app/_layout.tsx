@@ -1,6 +1,7 @@
 // First, and it has to be first: this is what loads the Tailwind pipeline and
 // the theme tokens every class name below resolves through.
 import '../global.css';
+import '@/config/i18n';
 
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';

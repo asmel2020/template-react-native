@@ -1,26 +1,28 @@
 import React from "react";
 import { Stack, useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/components/ui/error-state";
 
 export function NotFoundScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <>
       <Stack.Screen
         options={{
-          title: "No encontrado",
+          title: t("errors.notFoundTitle"),
           headerShown: false,
         }}
       />
       <ErrorState
         variant="404"
-        title="Página no encontrada"
-        description="Lo sentimos, la ruta a la que intentas acceder no existe en la aplicación o ha sido removida."
+        title={t("errors.notFoundTitle")}
+        description={t("errors.notFoundDesc")}
         onAction={() => router.replace("/(app)/(tabs)" as any)}
-        actionLabel="Volver al Inicio"
+        actionLabel={t("errors.goHome")}
         secondaryAction={() => router.back()}
-        secondaryActionLabel="← Regresar"
+        secondaryActionLabel={`← ${t("errors.goBack")}`}
       />
     </>
   );

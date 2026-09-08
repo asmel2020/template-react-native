@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
+import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Accordion,
@@ -55,6 +56,7 @@ function Section({
 }
 
 export default function ExampleScreen() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { setOpen, setCurrentRow } = useFeatureStore();
   const { toast } = useToast();
@@ -83,6 +85,84 @@ export default function ExampleScreen() {
           in Settings and watch every one of them follow.
         </Text>
       </View>
+
+      <Section
+        title="Protected Stacks"
+        hint="Navegación nativa a pantallas apiladas protegidas por autenticación."
+      >
+        <Card className="p-4 gap-3">
+          <Text size="sm" muted>
+            Demuestra cómo una pantalla de detalle se apila sobre las pestañas
+            con su propia barra de título y botón de regreso dentro de (app).
+          </Text>
+          <View className="flex-row gap-2">
+            <Button
+              className="flex-1"
+              onPress={() =>
+                router.push({
+                  pathname: "/item-detail/[id]" as any,
+                  params: { id: "1" },
+                })
+              }
+            >
+              Ver Detalle #1
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onPress={() =>
+                router.push({
+                  pathname: "/item-detail/[id]" as any,
+                  params: { id: "2" },
+                })
+              }
+            >
+              Ver Detalle #2
+            </Button>
+          </View>
+        </Card>
+
+        {/* Demostración de Pantallas de Error */}
+        <Card className="p-4 gap-3">
+          <Text size="sm" weight="medium">
+            Pantallas de Error del Sistema
+          </Text>
+          <Text size="xs" muted>
+            Prueba cómo responden las rutas de error 404, 500 y modo sin conexión.
+          </Text>
+          <View className="gap-2">
+            <Button
+              variant="outline"
+              onPress={() => router.push("/ruta-que-no-existe" as any)}
+            >
+              Probar 404 (Página No Encontrada)
+            </Button>
+            <View className="flex-row gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onPress={() => router.push("/errors/server-error" as any)}
+              >
+                Probar 500
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onPress={() => router.push("/errors/forbidden" as any)}
+              >
+                Probar 403
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onPress={() => router.push("/errors/offline" as any)}
+              >
+                Offline
+              </Button>
+            </View>
+          </View>
+        </Card>
+      </Section>
 
       <Section title="Buttons" hint="Variants, sizes, and a loading state.">
         <View className="gap-2">

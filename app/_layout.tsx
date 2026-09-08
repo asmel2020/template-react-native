@@ -19,6 +19,8 @@ import ProviderReactQuery from '@/lib/provider-react-query';
  * at once: `useCSSVariable` subscribes to theme changes, so this re-runs on
  * each switch, including the named themes that the OS knows nothing about.
  */
+export { ErrorBoundary } from '@/components/error-boundary-view';
+
 function ThemedNavigation() {
   const { mode } = useThemeMode();
   const [background, card, text, border, primary] = useCSSVariable([
@@ -46,8 +48,9 @@ function ThemedNavigation() {
   return (
     <ThemeProvider value={navigationTheme}>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(app)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="+not-found" options={{ headerShown: false }} />
       </Stack>
       {/* Not style="auto": that reads the OS appearance, which is left
           unspecified for the named themes. */}

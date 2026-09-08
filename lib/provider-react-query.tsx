@@ -22,7 +22,7 @@ const queryClient = new QueryClient({
 
         return !(
           error instanceof AxiosError &&
-          [401, 403].includes(error.response?.status ?? 0)
+          [401, 403, 404].includes(error.response?.status ?? 0)
         );
       },
       refetchOnWindowFocus: env.NODE_ENV === "production",
@@ -38,12 +38,19 @@ const queryClient = new QueryClient({
               description: "Your changes are live.",
             });
           }
+          if (error.response?.status === 404) {
+            toast.show({
+              variant: "destructive",
+              label: "Elemento no encontrado (404)",
+              description: "El recurso que intentas modificar ya no existe.",
+            });
+          }
         }
       },
     },
   },
   queryCache: new QueryCache({
-    onError: (error) => {
+    onError: (error, query) => {
       if (error instanceof AxiosError) {
         if (error.response?.status === 401) {
           toast.show({
@@ -52,22 +59,37 @@ const queryClient = new QueryClient({
           });
 
           useAuthStore.getState().auth.reset();
-          /*       const redirect = `${router.history.location.href}`; */
-          router.navigate({ pathname: "/", params: { redirect: "g" } });
+          router.replace("/(auth)/sign-in" as any);
+        }
+        if (error.response?.status === 403) {
+          toast.show({
+            variant: "destructive",
+            label: "Acceso Denegado (403)",
+            description: "No tienes permisos suficientes.",
+          });
+          router.replace("/errors/forbidden" as any);
+        }
+        if (error.response?.status === 404) {
+          toast.show({
+            variant: "warning",
+            label: "Recurso no encontrado (404)",
+            description: "El elemento solicitado no existe o fue eliminado.",
+          });
+
+          // Si la consulta tiene configurado meta: { redirectOn404: true }, redirige
+          if ((query.meta as Record<string, unknown> | undefined)?.redirectOn404) {
+            router.replace("/+not-found" as any);
+          }
         }
         if (error.response?.status === 500) {
           toast.show({
             variant: "destructive",
             label: "Internal Server Error!",
           });
-          // toast.error("Internal Server Error!");
           // Only navigate to error page in production to avoid disrupting HMR in development
           if (env.NODE_ENV === "production") {
-            router.replace({ pathname: "/" });
+            router.replace("/errors/server-error" as any);
           }
-        }
-        if (error.response?.status === 403) {
-          // router.navigate("/forbidden", { replace: true });
         }
       }
     },

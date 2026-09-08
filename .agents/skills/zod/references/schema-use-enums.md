@@ -66,7 +66,7 @@ OrderStatus.options  // ['pending', 'processing', 'shipped', 'delivered']
 type OrderStatusType = z.infer<typeof OrderStatus>  // 'pending' | 'processing' | ...
 ```
 
-**For native TypeScript enums:**
+**For native TypeScript enums (Zod v4):**
 
 ```typescript
 enum Role {
@@ -75,10 +75,14 @@ enum Role {
   Guest = 'guest',
 }
 
-// Use z.nativeEnum for TS enums
+// In Zod 4, z.enum() is overloaded to accept TypeScript enums directly
+// (z.nativeEnum() is now deprecated)
 const userSchema = z.object({
-  role: z.nativeEnum(Role),
+  role: z.enum(Role), // ✅
 })
+
+// Accessing enum values
+userSchema.shape.role.enum.Admin // ✅ "admin"
 ```
 
 **For single literal values (discriminated unions):**

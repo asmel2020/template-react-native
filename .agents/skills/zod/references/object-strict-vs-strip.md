@@ -36,10 +36,11 @@ const user = userSchema.parse(input)
 ```typescript
 import { z } from 'zod'
 
-const userSchema = z.object({
+// In Zod 4, prefer top-level z.strictObject() over .strict()
+const userSchema = z.strictObject({
   id: z.string(),
   name: z.string(),
-}).strict()
+})
 
 const input = {
   id: '123',
@@ -56,25 +57,25 @@ userSchema.parse(input)
 // - Typos in field names
 ```
 
-**When to use each mode:**
+**When to use each mode (Zod v4):**
 
 ```typescript
-// strict() - Catch unexpected data (API contracts)
-const apiRequestSchema = z.object({
+// z.strictObject() - Catch unexpected data (API contracts)
+const apiRequestSchema = z.strictObject({
   action: z.string(),
   payload: z.unknown(),
-}).strict()  // Fail if client sends unknown fields
+})  // Fail if client sends unknown fields
 
-// strip() - Clean up data (explicit intention)
+// z.object() - Strip unknown fields (default clean up data)
 const dbInsertSchema = z.object({
   name: z.string(),
-  email: z.string(),
-}).strip()  // Explicitly remove metadata before insert
+  email: z.email(),
+})  // Automatically removes metadata before insert
 
-// passthrough() - Keep everything (pass-through proxy)
-const proxySchema = z.object({
+// z.looseObject() - Keep everything (pass-through proxy)
+const proxySchema = z.looseObject({
   id: z.string(),
-}).passthrough()  // Keep fields we don't validate
+})  // Keep fields we don't validate
 
 const input = { id: '123', extra: 'data' }
 proxySchema.parse(input)  // { id: '123', extra: 'data' }

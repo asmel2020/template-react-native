@@ -103,29 +103,35 @@ const flattened = result.error.flatten((issue) => ({
 // }
 ```
 
-**For deeply nested objects, use format():**
+**In Zod v4: Use top-level `z.treeifyError()` (replaces deprecated `.format()` and `.flatten()`):**
+
+In Zod 4, `.flatten()` and `.format()` on `ZodError` are deprecated in favor of `z.treeifyError()`:
 
 ```typescript
+import { z } from 'zod'
+
 const result = formSchema.safeParse(data)
 
 if (!result.success) {
-  const formatted = result.error.format()
+  const tree = z.treeifyError(result.error)
+  // Structured tree of errors:
   // {
-  //   _errors: [],
-  //   email: { _errors: ['Invalid email'] },
-  //   profile: {
-  //     _errors: [],
-  //     name: { _errors: ['Name required'] }
+  //   errors: [],
+  //   properties: {
+  //     email: { errors: ['Invalid email'] },
+  //     profile: {
+  //       errors: [],
+  //       properties: {
+  //         name: { errors: ['Name required'] }
+  //       }
+  //     }
   //   }
   // }
 
-  // Access nested errors naturally
-  formatted.profile?.name?._errors  // ['Name required']
+  // Or directly inspect result.error.issues:
+  console.log(result.error.issues)
 }
 ```
 
-**When NOT to use this pattern:**
-- When you need access to full issue metadata (code, path as array)
-- When using a form library that expects different error format
+Reference: [Zod v4 Changelog - Deprecates .format() and .flatten()](https://zod.dev/v4/changelog#deprecates-format)
 
-Reference: [Zod Error Handling](https://zod.dev/error-handling)

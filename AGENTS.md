@@ -13,7 +13,7 @@ Template moderno, escalable y listo para producción para **React Native** y **E
 - **Arquitectura de Código**: **Feature-Driven Architecture** (módulos desacoplados en `features/`).
 - **Estado del Servidor & Caché**: TanStack Query v5 + Axios estructurado por capas (API, Keys, Hooks).
 - **Estado Global del Cliente**: Zustand v5 + `react-native-mmkv` (almacenamiento nativo en C++, síncrono y ultra-rápido).
-- **Formularios & Validación**: **Única y exclusivamente `@tanstack/react-form` + `Zod`** mediante la especificación **Standard Schema** (`~standard`).
+- **Formularios & Validación**: **Única y exclusivamente `@tanstack/react-form` + `Zod v4`** (con funciones top-level `z.email()`, `{ error }`) mediante la especificación **Standard Schema** (`~standard`).
 - **Sistema de Diseño**: Tailwind CSS v4 + `uniwind` (CSS Variables en vivo para temas claro/oscuro) + componentes de `panelui-native`.
 - **Estabilidad de Compilación**: `.npmrc` con `node-linker=hoisted` para evitar limitaciones de rutas largas de Windows en CMake (`CMAKE_OBJECT_PATH_MAX`).
 
@@ -212,10 +212,10 @@ import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 import { Input, Button, Text } from "panelui-native";
 
-// 1. Esquema Zod con mensajes descriptivos
+// 1. Esquema Zod v4 con funciones de primer nivel y parámetro { error }
 const loginSchema = z.object({
-  email: z.string().email("Ingresa un correo electrónico válido"),
-  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+  email: z.email({ error: "Ingresa un correo electrónico válido" }),
+  password: z.string().min(6, { error: "La contraseña debe tener al menos 6 caracteres" }),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -304,9 +304,14 @@ export function LoginForm() {
 
 ### Reglas Clave para Formularios:
 1. **Binding en React Native**: Enlazar siempre `value={field.state.value}`, `onChangeText={field.handleChange}` y `onBlur={field.handleBlur}`.
-2. **Números en React Native**: Como `TextInput` opera con strings, usar `z.coerce.number()` en el esquema Zod o transformar con `Number(text)` en `onChangeText`.
-3. **UX de Errores**: Mostrar errores condicionados a `field.state.meta.isTouched && field.state.meta.errors.length > 0` para no frustrar al usuario antes de interactuar.
-4. **Validación Asíncrona con Debounce**: En comprobaciones de backend (ej. verificar email existente con `.refine(async ...)`), usar siempre `asyncDebounceMs={500}` en el campo para no saturar el servidor.
+2. **Estándares Modernos Zod v4 (OBLIGATORIO)**:
+   - **Formatos de Primer Nivel**: Usar `z.email()`, `z.url()`, `z.uuid()`, `z.cuid()`, `z.ipv4()`, `z.iso.date()`, etc. Está **PROHIBIDO** encadenar métodos obsoletos como `z.string().email()`.
+   - **Parámetro Unificado `{ error }`**: Usar siempre `{ error: "..." }` para personalizar mensajes de error en schemas, validadores y `.refine()`. Están **PROHIBIDOS** los parámetros obsoletos `message`, `invalid_type_error` y `required_error`.
+   - **TypeScript Enums**: Usar `z.enum(MiEnum)` (el método `z.nativeEnum()` está obsoleto).
+   - **Objetos Estrictos**: Usar `z.strictObject(...)` y `z.looseObject(...)` en lugar de `.strict()` y `.passthrough()`.
+3. **Números en React Native**: Como `TextInput` opera con strings, usar `z.coerce.number()` en el esquema Zod o transformar con `Number(text)` en `onChangeText`.
+4. **UX de Errores**: Mostrar errores condicionados a `field.state.meta.isTouched && field.state.meta.errors.length > 0` para no frustrar al usuario antes de interactuar.
+5. **Validación Asíncrona con Debounce**: En comprobaciones de backend (ej. verificar email existente con `.refine(async ...)`), usar siempre `asyncDebounceMs={500}` en el campo para no saturar el servidor.
 
 ---
 

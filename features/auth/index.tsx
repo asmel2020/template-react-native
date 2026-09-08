@@ -6,10 +6,10 @@ import { z } from "zod";
 import { Button, Card, Input, Text, toast } from "panelui-native";
 import { useAuthStore } from "@/stores/auth-store";
 
-// Esquema de validación con Zod
+// Esquema de validación con Zod v4 (top-level z.email y parámetro { error })
 const signInSchema = z.object({
-  email: z.string().email("Ingresa un correo electrónico válido"),
-  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+  email: z.email({ error: "Ingresa un correo electrónico válido" }),
+  password: z.string().min(6, { error: "La contraseña debe tener al menos 6 caracteres" }),
 });
 
 /**

@@ -5,20 +5,20 @@ impactDescription: Unvalidated strings allow SQL injection, XSS, and malformed d
 tags: schema, string, validation, security
 ---
 
-## Apply String Validations at Schema Definition
+## Apply String Validations at Schema Definition (Zod v4)
 
-Plain `z.string()` accepts any string including empty strings, extremely long strings, and malicious content. Apply constraints like `min()`, `max()`, `email()`, `url()`, or `regex()` at schema definition to reject invalid data at the boundary.
+Plain `z.string()` accepts any string including empty strings, extremely long strings, and malicious content. In **Zod v4**, string formats are first-class schemas under the top-level `z` namespace (`z.email()`, `z.url()`, `z.uuid()`, etc.) rather than method chains on `z.string()`. Custom error messages use the unified `{ error: '...' }` parameter.
 
-**Incorrect (no string validations):**
+**Incorrect (deprecated Zod 3 method forms and unvalidated strings):**
 
 ```typescript
 import { z } from 'zod'
 
 const commentSchema = z.object({
   author: z.string(),  // Empty string passes
-  email: z.string(),  // "not-an-email" passes
+  email: z.string().email('Invalid email address'),  // ❌ z.string().email() is deprecated in Zod 4
   content: z.string(),  // 10MB string passes, script tags pass
-  website: z.string().optional(),  // "javascript:alert(1)" passes
+  website: z.string().url('Invalid URL').optional(),  // ❌ z.string().url() is deprecated in Zod 4
 })
 
 // All of these pass validation
@@ -30,28 +30,26 @@ commentSchema.parse({
 })
 ```
 
-**Correct (string validations applied):**
+**Correct (Zod v4 top-level schemas & { error } parameter):**
 
 ```typescript
 import { z } from 'zod'
 
 const commentSchema = z.object({
   author: z.string()
-    .min(1, 'Author is required')
-    .max(100, 'Author name too long'),
+    .min(1, { error: 'Author is required' })
+    .max(100, { error: 'Author name too long' }),
 
-  email: z.string()
-    .email('Invalid email address'),
+  email: z.email({ error: 'Invalid email address' }),  // ✅ Top-level schema
 
   content: z.string()
-    .min(1, 'Comment cannot be empty')
-    .max(5000, 'Comment too long'),
+    .min(1, { error: 'Comment cannot be empty' })
+    .max(5000, { error: 'Comment too long' }),
 
-  website: z.string()
-    .url('Invalid URL')
+  website: z.url({ error: 'Invalid URL' })  // ✅ Top-level schema
     .refine(
       url => url.startsWith('http://') || url.startsWith('https://'),
-      'Only http/https URLs allowed'
+      { error: 'Only http/https URLs allowed' }
     )
     .optional(),
 })
@@ -65,26 +63,44 @@ commentSchema.parse({
 // ZodError with all violations listed
 ```
 
-**Common string validations:**
+**Zod v4 String Formats (Top-level namespace):**
 
 ```typescript
-z.string().min(1)  // Non-empty (most common need)
+// Common string constraints (methods on z.string())
+z.string().min(1, { error: 'Required' })  // Non-empty
 z.string().max(255)  // Database varchar limit
-z.string().length(36)  // Exact length (UUIDs)
-z.string().email()  // Email format
-z.string().url()  // URL format
-z.string().uuid()  // UUID format
-z.string().cuid()  // CUID format
+z.string().length(36)  // Exact length
 z.string().regex(/^[a-z0-9-]+$/)  // Custom pattern (slugs)
 z.string().startsWith('https://')  // Prefix check
 z.string().endsWith('.pdf')  // Suffix check
 z.string().includes('@')  // Contains check
-z.string().trim()  // Strips whitespace (transform)
-z.string().toLowerCase()  // Normalizes case (transform)
+z.string().trim()  // Strips whitespace
+z.string().toLowerCase()  // Normalizes case
+
+// Top-level string formats in Zod v4 (replaces z.string().email() etc.):
+z.email({ error: 'Invalid email' })  // Email format
+z.url({ error: 'Invalid URL' })  // URL format
+z.uuid({ error: 'Invalid UUID' })  // UUID format (RFC 4122 v1-v5)
+z.cuid()  // CUID format
+z.cuid2()  // CUID2 format
+z.nanoid()  // Nano ID format
+z.ulid()  // ULID format
+z.emoji()  // Validates a single emoji character
+z.base64()  // Base64 encoded string
+z.base64url()  // Base64URL encoded string
+z.ipv4()  // IPv4 address (replaces z.string().ip({ version: 'v4' }))
+z.ipv6()  // IPv6 address
+z.cidrv4()  // IPv4 CIDR range
+z.cidrv6()  // IPv6 CIDR range
+z.iso.date()  // ISO date (YYYY-MM-DD)
+z.iso.time()  // ISO time (HH:mm:ss)
+z.iso.datetime()  // ISO 8601 datetime
+z.iso.duration()  // ISO 8601 duration
 ```
 
 **When NOT to use this pattern:**
 - When accepting arbitrary user content for display only (sanitize on output instead)
 - When building a passthrough/proxy that shouldn't validate content
 
-Reference: [Zod API - Strings](https://zod.dev/api#strings)
+Reference: [Zod v4 Changelog - Deprecates .email() etc.](https://zod.dev/v4/changelog#deprecates-email-etc)
+

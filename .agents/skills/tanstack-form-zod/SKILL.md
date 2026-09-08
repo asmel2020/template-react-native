@@ -25,8 +25,8 @@ import { z } from 'zod';
 import { useForm } from '@tanstack/react-form';
 
 const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  email: z.email({ error: 'Email inválido' }),
+  password: z.string().min(6, { error: 'La contraseña debe tener al menos 6 caracteres' }),
 });
 ```
 
@@ -44,7 +44,7 @@ Se evalúa cada vez que el valor cambia mediante `field.handleChange(val)`:
 <form.Field
   name="age"
   validators={{
-    onChange: z.coerce.number().min(13, 'Debes tener al menos 13 años'),
+    onChange: z.coerce.number().min(13, { error: 'Debes tener al menos 13 años' }),
   }}
 >
   {(field) => (
@@ -69,7 +69,7 @@ Se evalúa únicamente cuando el usuario abandona el campo (llamando a `field.ha
 <form.Field
   name="age"
   validators={{
-    onBlur: z.coerce.number().min(13, 'Debes tener al menos 13 años'),
+    onBlur: z.coerce.number().min(13, { error: 'Debes tener al menos 13 años' }),
   }}
 >
   {(field) => (
@@ -96,9 +96,9 @@ Puedes validar diferentes aspectos del campo en momentos distintos:
   name="age"
   validators={{
     // Valida rango positivo mientras escribe
-    onChange: z.coerce.number().min(0, 'La edad no puede ser negativa'),
+    onChange: z.coerce.number().min(0, { error: 'La edad no puede ser negativa' }),
     // Valida mayoría de edad solo al salir del campo
-    onBlur: z.coerce.number().min(18, 'Debes ser mayor de edad'),
+    onBlur: z.coerce.number().min(18, { error: 'Debes ser mayor de edad' }),
   }}
 >
   {(field) => (
@@ -151,8 +151,8 @@ Al pasar un `z.object({...})` a los `validators` de `useForm()`, TanStack Form v
 
 ```tsx
 const userSchema = z.object({
-  fullName: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
-  age: z.coerce.number().min(13, 'Debes tener al menos 13 años'),
+  fullName: z.string().min(3, { error: 'El nombre debe tener al menos 3 caracteres' }),
+  age: z.coerce.number().min(13, { error: 'Debes tener al menos 13 años' }),
 });
 
 export function RegisterForm() {
@@ -247,7 +247,7 @@ const usernameSchema = z.string().min(3).refine(
     const isAvailable = await checkUsernameInApi(username);
     return isAvailable;
   },
-  { message: 'Este nombre de usuario ya está en uso' }
+  { error: 'Este nombre de usuario ya está en uso' }
 );
 ```
 
@@ -260,14 +260,14 @@ Para evitar saturar el backend con peticiones en cada pulsación, **siempre util
   asyncDebounceMs={500}
   validators={{
     // Validación síncrona inmediata
-    onChange: z.string().min(3, 'Mínimo 3 caracteres'),
+    onChange: z.string().min(3, { error: 'Mínimo 3 caracteres' }),
     // Validación asíncrona debounced
     onChangeAsync: z.string().refine(
       async (val) => {
         const available = await apiCheckUsername(val);
         return available;
       },
-      { message: 'El usuario ya existe' }
+      { error: 'El usuario ya existe' }
     ),
   }}
 >
@@ -330,8 +330,8 @@ Permite transformar automáticamente la cadena recibida al número correspondien
 ```tsx
 const schema = z.object({
   age: z.coerce
-    .number({ invalid_type_error: 'Debe ingresar un número' })
-    .min(18, 'Debes ser mayor de 18'),
+    .number({ error: 'Debe ingresar un número' })
+    .min(18, { error: 'Debes ser mayor de 18' }),
 });
 ```
 
@@ -361,8 +361,8 @@ import { z } from 'zod';
 import { Input, Button, Text } from 'panelui-native';
 
 const registerSchema = z.object({
-  email: z.string().email('Ingresa un correo electrónico válido'),
-  age: z.coerce.number().min(18, 'Debes ser mayor de edad (18+)'),
+  email: z.email({ error: 'Ingresa un correo electrónico válido' }),
+  age: z.coerce.number().min(18, { error: 'Debes ser mayor de edad (18+)' }),
 });
 
 export function RegisterScreen() {
@@ -393,7 +393,7 @@ export function RegisterScreen() {
               const isAvailable = await checkEmailAvailability(email);
               return isAvailable;
             },
-            { message: 'Este correo ya se encuentra registrado' }
+            { error: 'Este correo ya se encuentra registrado' }
           ),
         }}
       >

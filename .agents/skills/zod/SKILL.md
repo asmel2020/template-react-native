@@ -32,6 +32,90 @@ Reference these guidelines when:
 | 7 | Refinements & Transforms | MEDIUM | `refine-` |
 | 8 | Performance & Bundle | LOW-MEDIUM | `perf-` |
 
+## Zod v4 Migration & Modern Conventions (CRITICAL)
+
+> [!IMPORTANT]
+> This codebase uses **Zod v4**. The following patterns from Zod 3 are deprecated or dropped. Always use the modern Zod v4 syntax:
+
+### 1. Top-Level String Formats (Deprecates `.email()` etc.)
+In Zod 4, string formats are subclasses of `ZodString` exposed as top-level functions rather than method chains on `z.string()`.
+```typescript
+// ❌ Deprecated in Zod 4
+z.string().email()
+z.string().url()
+z.string().uuid()
+z.string().cuid()
+
+// ✅ Modern Zod 4 (Top-level namespace)
+z.email()
+z.url()
+z.uuid()
+z.cuid()
+z.cuid2()
+z.ulid()
+z.nanoid()
+z.emoji()
+z.base64()
+z.base64url()
+z.ipv4()    // Replaces z.string().ip()
+z.ipv6()
+z.cidrv4()  // Replaces z.string().cidr()
+z.cidrv6()
+z.iso.date()
+z.iso.time()
+z.iso.datetime()
+z.iso.duration()
+```
+
+### 2. Error Parameter Unification (`error` replaces `message` & dropped legacy errors)
+- `invalid_type_error` and `required_error` have been **dropped**.
+- `message` parameter and raw string message arguments are **deprecated**.
+- Use the unified `{ error: ... }` parameter (supports string or `(issue) => string`):
+```typescript
+// ❌ Deprecated / Dropped
+z.string({ required_error: 'Required', invalid_type_error: 'Must be text' })
+z.string().min(5, 'Too short')
+z.string().email('Invalid email')
+schema.refine(fn, { message: 'Failed' })
+
+// ✅ Modern Zod 4
+z.string({ error: (issue) => issue.input === undefined ? 'Required' : 'Must be text' })
+z.string().min(5, { error: 'Too short' })
+z.email({ error: 'Invalid email' })
+schema.refine(fn, { error: 'Failed' })
+```
+
+### 3. Enums (`z.nativeEnum` deprecated)
+`z.nativeEnum()` is deprecated in favor of overloading `z.enum()`:
+```typescript
+enum Role { Admin = 'admin', User = 'user' }
+
+// ❌ Deprecated: z.nativeEnum(Role)
+// ✅ Modern Zod 4:
+const roleSchema = z.enum(Role)
+```
+
+### 4. Object Strictness (`.strict()` & `.passthrough()` deprecated)
+Use top-level functions instead of method chains:
+```typescript
+// ❌ Legacy: z.object({...}).strict()
+// ✅ Modern Zod 4:
+z.strictObject({ id: z.string() })
+z.looseObject({ id: z.string() })
+```
+
+### 5. Error Inspection (`.format()` & `.flatten()` deprecated)
+Use top-level `z.treeifyError()` instead of `.format()` / `.flatten()`:
+```typescript
+// ❌ Deprecated: err.format(), err.flatten()
+// ❌ Dropped: err.formErrors, err.errors
+// ✅ Modern Zod 4:
+const tree = z.treeifyError(err)
+const issues = err.issues
+```
+
+---
+
 ## Quick Reference
 
 ### 1. Schema Definition (CRITICAL)

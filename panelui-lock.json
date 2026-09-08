@@ -1,0 +1,60 @@
+{
+  "version": 2,
+  "files": {
+    "components/ui/button.tsx": {
+      "item": "button",
+      "digest": "sha256:fd2a75b812d212b49b922993c2e600aa1f198b5cfec5f8c68e592984dd9a9269"
+    },
+    "components/ui/animated-pressable.tsx": {
+      "item": "animated-pressable",
+      "digest": "sha256:1b36a4a54b2b7e58ebb087370f867b8f8641d7e620045d97e931abad6356d150"
+    },
+    "lib/cn.ts": {
+      "item": "cn",
+      "digest": "sha256:9304a861c8673bee09e0f12de31773abbde503b02e59dfd74763ddec2e37cf05"
+    },
+    "components/ui/icons.tsx": {
+      "item": "icons",
+      "digest": "sha256:e383acec2fe3d33f10e22ab04ac6519615652c68ee157050c1f4dc1a8209331f"
+    },
+    "hooks/use-direction.ts": {
+      "item": "use-direction",
+      "digest": "sha256:9202d8550abaed8720af42d0320acf51e227fbf23f649b5636fd26475b849867"
+    },
+    "lib/native.ts": {
+      "item": "native",
+      "digest": "sha256:44407dea4ffaececbb542fb459022cd6abccf222c671246f98c70b0ad91d6e2e"
+    },
+    "lib/native-host.tsx": {
+      "item": "native",
+      "digest": "sha256:c03292c099c4cf992798e6cde2b0628731f8e6f30f88a992b8f2b3c8e47a210e"
+    },
+    "hooks/use-theme.ts": {
+      "item": "use-theme",
+      "digest": "sha256:1e0fe0e82d80fbb51c93bf6735d2676cf5f125a7f8f1210756e0aec5e8ec743f"
+    },
+    "components/ui/spinner.tsx": {
+      "item": "spinner",
+      "digest": "sha256:bb64b6e48da6dc9b0f92c356562bd561a974afa966bf06120594a508d92d3436"
+    },
+    "components/ui/text.tsx": {
+      "item": "text",
+      "digest": "sha256:7d2ac97b2f276c5ff03f524b21cde8616cfe9217a0a0c49d39eeba620bf462de"
+    }
+  },
+  "roots": {
+    "button": [
+      "button",
+      "animated-pressable",
+      "cn",
+      "icons",
+      "use-direction",
+      "native",
+      "use-theme",
+      "spinner",
+      "text"
+    ]
+  },
+  "legacyFiles": [],
+  "registry": "https://panelui.dev/r"
+}

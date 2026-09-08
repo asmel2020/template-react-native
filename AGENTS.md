@@ -50,7 +50,8 @@ d:/trabajo/template-react-native/
 │       ├── error-state.tsx       # Componente reutilizable para estados 404, 500, 403, offline
 │       └── icons.tsx             # Iconos del sistema con resolución de color por tema
 ├── config/                       # Configuración y variables de entorno
-│   ├── api.ts                    # Instancia base de Axios con interceptores
+│   ├── api.ts                    # Instancia base de Axios con interceptores y cabeceras de dispositivo
+│   ├── device-info.ts            # Extractor de telemetría y metadatos nativos del dispositivo
 │   ├── env.ts                    # Validación y exportación de variables de entorno
 │   └── i18n/                     # Sistema multi-idioma (i18next, locales, persistencia MMKV)
 │       ├── index.ts              # Inicializador de i18n con detección de dispositivo y helpers
@@ -61,6 +62,7 @@ d:/trabajo/template-react-native/
 │   ├── home/                     # Pantalla principal Home
 │   ├── example/                  # Ejemplos de componentes, CRUD items, stores y hooks
 │   │   ├── api/                  # Endpoints y tipos de la feature
+│   │   ├── components/           # Diálogos y bottom sheets controlados por Zustand
 │   │   ├── hook/                 # Custom hooks de TanStack Query
 │   │   ├── stores/               # Zustand slices locales de la feature
 │   │   └── index.tsx             # Pantalla ExampleScreen
@@ -68,6 +70,7 @@ d:/trabajo/template-react-native/
 │   ├── settings/                 # Configuración de tema, perfil y logout
 │   └── errors/                   # Pantallas de error (404, 500, 403, offline)
 ├── lib/                          # Utilidades e integraciones de infraestructura
+│   ├── auth-token.ts             # Almacenamiento seguro en MMKV con soporte web condicional
 │   ├── decode-jwt.tsx            # Utilidad segura para decodificar JWTs sin dependencias CJS
 │   └── provider-react-query.tsx  # QueryClient configurado con manejo global de errores HTTP
 ├── stores/                       # Stores globales de Zustand (Auth, persistencia MMKV)
@@ -191,6 +194,15 @@ export const useCreateItemMutation = () => {
 - **404**: Muestra toast de recurso no encontrado y redirige a `+not-found` si la consulta tiene `meta: { redirectOn404: true }`.
 - **500**: Muestra toast de error de servidor y en producción redirige a `/errors/server-error`.
 - **Reintentos (`retry`)**: Los errores `401`, `403` y `404` están excluidos de reintentos automáticos.
+
+### Telemetría y Cabeceras Automáticas de Dispositivo (`config/device-info.ts` + `config/api.ts`)
+Cada solicitud HTTP realizada a través de la instancia central `api` incluye automáticamente metadatos contextuales y telemetría del cliente inyectados mediante interceptores de Axios:
+- **Identificador Único (`X-Device-Id`)**: ID persistente que sobrevive a reinicios de la app (utiliza el `Android ID` por hardware en Android o un UUID v4 seguro persistido en `deviceStorage` de MMKV).
+- **Hardware & Plataforma**: `X-Device-Platform`, `X-Device-Brand`, `X-Device-Manufacturer`, `X-Device-Model`, `X-Device-Type` (`phone`, `tablet`, `desktop`, `tv`), `X-Device-Is-Physical`.
+- **Sistema Operativo**: `X-Device-OS-Name`, `X-Device-OS-Version`.
+- **Localización & Pantalla**: `X-Device-Locale`, `X-Device-Timezone`, `X-Device-Screen` (ej: `1080x2400@2.75x`), `X-Device-Font-Scale`.
+- **Aplicación & Sesión**: `X-App-Id`, `X-App-Name`, `X-App-Version`, `X-App-Build`, `X-App-Language`.
+- **User-Agent Estandarizado (`X-Client-User-Agent`)**: Formato unificado `AppName/AppVersion (OS OSVersion; Brand Model; Locale)` para trazabilidad en logs y observabilidad de backend.
 
 ---
 
@@ -318,12 +330,29 @@ export function LoginForm() {
 ## 7. Estado del Cliente y Persistencia (Zustand + MMKV)
 
 - **Persistencia**: Usar siempre `react-native-mmkv` mediante el middleware `persist` de Zustand. No utilizar `AsyncStorage`.
+- **Compatibilidad Multiplataforma (Web & Native)**: En Web (`Platform.OS === "web"`), el cifrado AES-256 nativo de C++ no está soportado. En `lib/auth-token.ts` se omiten condicionalmente `encryptionKey` y `encryptionType` cuando la app corre en navegador web para garantizar compatibilidad sin caídas de ejecución.
 - **Estructura del Store de Autenticación (`stores/auth-store.ts`)**:
   - `auth.accessToken`: Token JWT activo (o `null`).
   - `auth.user`: Objeto con la información del usuario autenticado (extraída de forma segura mediante `decodeJwt`).
   - Métodos `login()`, `logout()`, `setUser()`, `reset()`.
-- **UI State (Diálogos y Overlays)**:
-  - Usar Zustand para controlar la apertura y los parámetros de `BottomSheet`, `Dialog` y menús contextuales desacoplados de la vista principal.
+
+### Patrón de Diálogos y Overlays Controlados con Zustand (`manage-dialogs-zustand`)
+Para mantener las pantallas y vistas limpias y desacopladas de modales, alertas y bottom sheets:
+
+1. **Store de la Feature (`features/<feature>/stores/use-<feature>.ts`)**:
+   - `open`: Identificador del diálogo activo (`DialogType | null`).
+   - `currentRow`: Parámetros o entidad seleccionada (`RowType | null`).
+   - Acciones `setOpen(type)` y `setCurrentRow(row)`.
+
+2. **Orquestador Central (`features/<feature>/components/dialog.tsx`)**:
+   - Componente único que se monta al final de la pantalla principal (`<Dialog />`).
+   - Escucha el store y renderiza condicionalmente los diálogos o bottom sheets.
+   - Cierra los modales reseteando tanto `open` como `currentRow` (`handleClose`).
+   - Separa claramente diálogos simples de aquellos parametrizados (`open === "modal-params" && currentRow && <ExampleParamsDialog ... />`).
+
+3. **Modales Puros y Controlados**:
+   - Cada diálogo/sheet (`example-dialog.tsx`, `example-bottom-sheet.tsx`) recibe exclusivamente `open: boolean` y `onOpenChange: (open: boolean) => void`.
+   - **PROHIBIDO** incluir `<Dialog.Trigger>` o `<BottomSheet.Trigger>` dentro de estos componentes; la visibilidad es controlada al 100% por props.
 
 ---
 
@@ -410,6 +439,9 @@ export function ExampleI18n() {
 ```bash
 # Iniciar servidor de desarrollo Metro
 pnpm start
+
+# Iniciar servidor en navegador Web
+pnpm web
 
 # Ejecutar en emulador o dispositivo Android
 pnpm android

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { env } from "./env";
 import { useAuthStore } from "@/stores/auth-store";
+import { getDeviceHeaders } from "./device-info";
 
 const BASE_URL = env.EXPO_PUBLIC_API_URL;
 
@@ -11,8 +12,17 @@ const api = axios.create({
 api.interceptors.request.use(async (config) => {
   const token = useAuthStore.getState().auth.accessToken;
 
+  // Inyectar Token de autorización
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  // Inyectar toda la metadata y cabeceras del dispositivo
+  const deviceHeaders = getDeviceHeaders();
+  for (const [key, value] of Object.entries(deviceHeaders)) {
+    if (value && !config.headers[key]) {
+      config.headers[key] = value;
+    }
   }
 
   if (__DEV__) {

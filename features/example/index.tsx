@@ -22,6 +22,7 @@ import {
   useToast,
 } from "panelui-native";
 import { useFeatureStore } from "./stores/use-componentes";
+import { Dialog } from "./components/dialog";
 
 /** A labelled block, so each group reads as one thing rather than a run of rows. */
 function Section({
@@ -128,7 +129,8 @@ export default function ExampleScreen() {
             Pantallas de Error del Sistema
           </Text>
           <Text size="xs" muted>
-            Prueba cómo responden las rutas de error 404, 500 y modo sin conexión.
+            Prueba cómo responden las rutas de error 404, 500 y modo sin
+            conexión.
           </Text>
           <View className="gap-2">
             <Button
@@ -204,14 +206,35 @@ export default function ExampleScreen() {
           </Button>
           <Button
             variant="outline"
-            onPress={() =>
+            onPress={() => {
               setCurrentRow({
                 title: "Example Parameters",
                 description: "This is an example of a dialog with parameters",
-              })
-            }
+              });
+              setOpen("example-params");
+            }}
           >
             Open a dialog with parameters
+          </Button>
+
+          <Button
+            variant="outline"
+            onPress={() => setOpen("example-bottom-sheet")}
+          >
+            Open a bottom sheet
+          </Button>
+          <Button
+            variant="outline"
+            onPress={() => {
+              setCurrentRow({
+                title: "Example Parameters",
+                description:
+                  "This is an example of a bottom sheet with parameters",
+              });
+              setOpen("example-params-bottom-sheet");
+            }}
+          >
+            Open a bottom sheet with parameters
           </Button>
           <Button
             variant="outline"
@@ -365,21 +388,7 @@ export default function ExampleScreen() {
           </Card.Content>
         </Card>
       </Section>
-
-      <Section title="BottomSheet" hint="BottomSheet measures its own content.">
-        <BottomSheet>
-          <BottomSheet.Trigger>
-            <Button variant="outline">Share</Button>
-          </BottomSheet.Trigger>
-          <BottomSheet.Content>
-            <Text size="lg" weight="semibold">
-              Share project
-            </Text>
-            <Input placeholder="https://panelui.dev/p/xK2f9" />
-            <Button>Copy link</Button>
-          </BottomSheet.Content>
-        </BottomSheet>
-      </Section>
+      <Dialog />
     </ScrollView>
   );
 }

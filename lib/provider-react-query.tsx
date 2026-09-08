@@ -59,7 +59,7 @@ const queryClient = new QueryClient({
           });
 
           useAuthStore.getState().auth.reset();
-          router.replace("/(auth)/sign-in" as any);
+          router.replace("/(auth)/sign-in");
         }
         if (error.response?.status === 403) {
           toast.show({
@@ -67,7 +67,7 @@ const queryClient = new QueryClient({
             label: "Acceso Denegado (403)",
             description: "No tienes permisos suficientes.",
           });
-          router.replace("/errors/forbidden" as any);
+          router.replace("/errors/forbidden");
         }
         if (error.response?.status === 404) {
           toast.show({
@@ -77,8 +77,10 @@ const queryClient = new QueryClient({
           });
 
           // Si la consulta tiene configurado meta: { redirectOn404: true }, redirige
-          if ((query.meta as Record<string, unknown> | undefined)?.redirectOn404) {
-            router.replace("/+not-found" as any);
+          if (
+            (query.meta as Record<string, unknown> | undefined)?.redirectOn404
+          ) {
+            router.replace("/+not-found");
           }
         }
         if (error.response?.status === 500) {
@@ -88,7 +90,7 @@ const queryClient = new QueryClient({
           });
           // Only navigate to error page in production to avoid disrupting HMR in development
           if (env.NODE_ENV === "production") {
-            router.replace("/errors/server-error" as any);
+            router.replace("/errors/server-error");
           }
         }
       }

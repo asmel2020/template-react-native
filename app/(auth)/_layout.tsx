@@ -6,7 +6,7 @@ export default function AuthLayout() {
 
   // Si el usuario ya está autenticado, redirige a las pestañas principales
   if (accessToken) {
-    return <Redirect href="/(tabs)" />;
+    return <Redirect href="/(app)/(tabs)" />;
   }
 
   return (

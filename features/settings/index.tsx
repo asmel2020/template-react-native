@@ -1,6 +1,7 @@
 import { Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
+  Button,
   Card,
   Item,
   PANEL_THEMES,
@@ -8,10 +9,16 @@ import {
   Text,
   useThemeMode,
 } from "panelui-native";
+import { useAuthStore } from "@/stores/auth-store";
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { family, mode, setFamily, toggleMode } = useThemeMode();
+  const { user, reset } = useAuthStore((s) => s.auth);
+
+  const handleLogout = () => {
+    reset();
+  };
 
   return (
     <ScrollView
@@ -93,6 +100,35 @@ export default function SettingsScreen() {
               />
             </Item.Actions>
           </Item>
+        </Card>
+      </View>
+
+      <View className="gap-3">
+        <Text
+          size="sm"
+          weight="medium"
+          muted
+          className="uppercase tracking-wider"
+        >
+          Cuenta
+        </Text>
+
+        <Card>
+          <Card.Content className="p-4 gap-3">
+            <View>
+              <Text weight="semibold">{user?.username ?? "Usuario"}</Text>
+              <Text size="sm" muted>
+                {user?.email ?? "Sin correo registrado"}
+              </Text>
+            </View>
+
+            <Button
+              variant="destructive"
+              onPress={handleLogout}
+            >
+              Cerrar Sesión
+            </Button>
+          </Card.Content>
         </Card>
       </View>
     </ScrollView>

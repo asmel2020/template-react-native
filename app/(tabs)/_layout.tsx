@@ -1,5 +1,7 @@
+import { Redirect } from "expo-router";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { useCSSVariable } from "uniwind";
+import { useAuthStore } from "@/stores/auth-store";
 
 /**
  * The tab bar, drawn by the platform.
@@ -19,6 +21,13 @@ import { useCSSVariable } from "uniwind";
  * native on each rather than the same drawing forced onto both.
  */
 export default function TabsLayout() {
+  const accessToken = useAuthStore((s) => s.auth.accessToken);
+
+  // Guard de rutas protegidas: Redirige al login si no hay sesión activa
+  if (!accessToken) {
+    return <Redirect href="/(auth)/sign-in" />;
+  }
+
   const [tint, icon, background] = useCSSVariable([
     "--color-primary",
     "--color-muted-foreground",

@@ -8,6 +8,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useCSSVariable } from 'uniwind';
 import { PanelUIProvider, useThemeMode } from 'panelui-native';
 
+import ProviderReactQuery from '@/lib/provider-react-query';
+
 /**
  * React Navigation paints its own theme background over every screen and
  * defaults to an opaque light grey, which sits on top of the themed background
@@ -43,7 +45,10 @@ function ThemedNavigation() {
 
   return (
     <ThemeProvider value={navigationTheme}>
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      </Stack>
       {/* Not style="auto": that reads the OS appearance, which is left
           unspecified for the named themes. */}
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
@@ -54,11 +59,13 @@ function ThemedNavigation() {
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      {/* Owns the portal host that dialogs, sheets, menus and toasts render
-          into. Overlays mount into it, so it has to be above every screen. */}
-      <PanelUIProvider>
-        <ThemedNavigation />
-      </PanelUIProvider>
+      <ProviderReactQuery>
+        {/* Owns the portal host that dialogs, sheets, menus and toasts render
+            into. Overlays mount into it, so it has to be above every screen. */}
+        <PanelUIProvider>
+          <ThemedNavigation />
+        </PanelUIProvider>
+      </ProviderReactQuery>
     </SafeAreaProvider>
   );
 }

@@ -70,9 +70,10 @@ d:/trabajo/template-react-native/
 │   ├── settings/                 # Configuración de tema, perfil y logout
 │   └── errors/                   # Pantallas de error (404, 500, 403, offline)
 ├── lib/                          # Utilidades e integraciones de infraestructura
-│   ├── auth-token.ts             # Almacenamiento seguro en MMKV con soporte web condicional
+│   ├── auth-token.ts             # Almacenamiento seguro de tokens JWT
 │   ├── decode-jwt.tsx            # Utilidad segura para decodificar JWTs sin dependencias CJS
-│   └── provider-react-query.tsx  # QueryClient configurado con manejo global de errores HTTP
+│   ├── provider-react-query.tsx  # QueryClient configurado con manejo global de errores HTTP
+│   └── safe-mmkv.ts              # Factory unificado de MMKV compatible con SSR, Web y Nativo
 ├── stores/                       # Stores globales de Zustand (Auth, persistencia MMKV)
 │   └── auth-store.ts             # Estado de autenticación con sincronización MMKV
 ├── types/                        # Declaraciones globales de TypeScript
@@ -329,8 +330,10 @@ export function LoginForm() {
 
 ## 7. Estado del Cliente y Persistencia (Zustand + MMKV)
 
-- **Persistencia**: Usar siempre `react-native-mmkv` mediante el middleware `persist` de Zustand. No utilizar `AsyncStorage`.
-- **Compatibilidad Multiplataforma (Web & Native)**: En Web (`Platform.OS === "web"`), el cifrado AES-256 nativo de C++ no está soportado. En `lib/auth-token.ts` se omiten condicionalmente `encryptionKey` y `encryptionType` cuando la app corre en navegador web para garantizar compatibilidad sin caídas de ejecución.
+- **Persistencia Multiplataforma y SSR (`lib/safe-mmkv.ts`)**: Usar siempre `createSafeMMKV` de `@/lib/safe-mmkv` para instanciar almacenamientos MMKV:
+  - **Soporte SSR / Expo Router Server Rendering**: En Node.js (durante renderizado estático/SSR de Expo Router en web), el acceso a `localStorage` lanza `Tried to access storage on the server`. `createSafeMMKV` detecta la falta de DOM y proporciona un almacén en memoria sin errores ni interrupciones.
+  - **Navegador Web**: En cliente web, delega al `localStorage` del navegador omitiendo opciones no soportadas (`encryptionKey`, `path`).
+  - **Nativo (Android & iOS)**: Utiliza la implementación completa de C++ (NitroModules) con cifrado AES-256 y persistencia en disco ultrarrápida.
 - **Estructura del Store de Autenticación (`stores/auth-store.ts`)**:
   - `auth.accessToken`: Token JWT activo (o `null`).
   - `auth.user`: Objeto con la información del usuario autenticado (extraída de forma segura mediante `decodeJwt`).

@@ -3,10 +3,10 @@ import * as Device from "expo-device";
 import * as Application from "expo-application";
 import { getCalendars, getLocales } from "expo-localization";
 import Constants from "expo-constants";
-import { createMMKV } from "react-native-mmkv";
+import { createSafeMMKV } from "@/lib/safe-mmkv";
 import i18n from "i18next";
 
-const deviceStorage = createMMKV({ id: "device-metadata-storage" });
+const deviceStorage = createSafeMMKV({ id: "device-metadata-storage" });
 const DEVICE_ID_KEY = "device_unique_client_id";
 
 /**

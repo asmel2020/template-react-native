@@ -1,18 +1,14 @@
 // src/lib/auth-token.ts
-import { Platform } from "react-native";
-import { createMMKV } from "react-native-mmkv";
-const isWeb = Platform.OS === "web";
-// Instancia cifrada dedicada a auth
-export const authStorage = createMMKV({
+import { createSafeMMKV } from "@/lib/safe-mmkv";
+
+// Instancia cifrada dedicada a auth (SSR-safe y Web-safe)
+export const authStorage = createSafeMMKV({
   id: "token-storage",
   mode: "multi-process",
   readOnly: false,
   compareBeforeSet: false,
-
-  ...(!isWeb && {
-    encryptionKey: "hunter2",
-    encryptionType: "AES-256",
-  }),
+  encryptionKey: "hunter2",
+  encryptionType: "AES-256",
 });
 
 export function saveAuthToken(key: string, token: string): void {

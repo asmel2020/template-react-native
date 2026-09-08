@@ -1,15 +1,15 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { getLocales } from "expo-localization";
-import { createMMKV } from "react-native-mmkv";
+import { createSafeMMKV } from "@/lib/safe-mmkv";
 import { es } from "./locales/es";
 import { en } from "./locales/en";
 import type { AppLanguage } from "./types";
 
 const LANGUAGE_STORAGE_KEY = "user-language";
 
-// Instancia MMKV dedicada para preferencias de la app
-export const preferenceStorage = createMMKV({
+// Instancia MMKV dedicada para preferencias de la app (SSR-safe y Web-safe)
+export const preferenceStorage = createSafeMMKV({
   id: "app-preferences-storage",
 });
 
